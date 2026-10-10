@@ -38,22 +38,15 @@ MVP 제외
 - Daily Scrum, PM/PL 미팅 등 다른 문서와 다른 레포의 Issues/PR
 - 현황/할 일 관리
 
-남은 가정(틀리면 알려주세요)
-- 조직에서 GitHub Actions의 예약 실행이 허용되어 있고, 워크플로를 `main`에 머지할 수 있습니다(브랜치 보호 규칙 확인 필요).
-- wiki 레포가 공개(`private: false`)라서 게시된 내용은 누구나 읽을 수 있습니다. 이 위험은 사용자가 책임집니다.
-- 팀장이 `GEMINI_API_KEY`를 등록하고, 키는 만료되거나 한도를 넘지 않습니다.
+남은 가정
+- 조직에서 GitHub Actions의 예약 실행이 허용되어 있습니다. 워크플로를 `main`에 머지할 수 있는 것은 확인됐고, `schedule` 트리거의 자동 발화는 첫 정규 실행(2026-10-11) 후에 확인합니다.
+- wiki 레포가 공개(`private: false`)라서 게시된 내용은 누구나 읽을 수 있습니다. 2026-10-10에 `PUBLIC`임을 확인했고, 이 위험은 사용자가 책임집니다.
+- `GEMINI_API_KEY`는 등록되어 실제 호출에 성공했습니다(확인됨). 키가 만료되거나 한도를 넘지 않는다는 가정은 남습니다.
 - 팀원 5명이 매주 게시된 Issue를 빠짐없이 검토합니다.
 
-팀장 확인 사항
-현재 계정(`whale5500d`)은 wiki 레포에 쓰기(push) 권한만 있고 admin이 아니라서, 아래 항목은 팀장(daniel, admin)이 확인하거나 처리해야 합니다.
-1. 팀 공용 Gemini API 키를 발급하고, 레포 Settings → Secrets and variables → Actions에 `GEMINI_API_KEY`로 등록합니다.
-2. Settings → Actions → General에서 Actions 사용 가능 여부, 사용 가능한 액션 정책(`actions/checkout` 등 허용), Workflow permissions를 확인합니다.
-3. `main` 브랜치 보호 규칙이 있으면 워크플로 PR을 승인합니다. 예약 실행은 `main`의 워크플로만 동작합니다.
-4. 팀원 전체에 자동 게시 방식(게시 전 검수 없음, 공개 레포)과 일요일 20:00 확인 절차를 공유합니다.
-
-팀장에게 보낼 요청문
-> wiki 레포(KTB4-20th-wiki)에 타운홀 문서 자동 생성 도구를 올리려고 합니다. 매주 일요일 20:00에 GitHub Actions가 지난 한 주의 `[Troubleshooting]` 이슈를 요약해서 `[Townhall] YYYY-MM-DD` Issue를 자동으로 올립니다. 게시 전 검수는 없고, 월요일 발표 전에 팀원이 게시된 Issue를 보고 직접 검토·수정하는 방식입니다. 아래 확인과 작업을 부탁드립니다.
-> 1. 팀 공용 Gemini API 키 발급 후, 레포 Settings → Secrets and variables → Actions에 `GEMINI_API_KEY`로 등록 (키 값은 저에게 전달하지 않으셔도 됩니다)
-> 2. Settings → Actions → General에서 Actions 사용 가능 여부, 사용 가능한 액션 정책, Workflow permissions 확인
-> 3. `main` 브랜치 보호 규칙이 있으면 워크플로 PR 승인
-> 4. 팀원 전체에 자동 게시 방식과 일요일 20:00 확인 절차 공유
+운영 투입 검증 결과(2026-10-10)
+`workflow_dispatch`로 `dry_run=false` 실행을 2회 수행해 아래를 확인했습니다. 검증용 Issue는 닫고 `[TestTownhall]`로 제목을 바꿔 두었습니다(#118).
+- 실제 게시: `GEMINI_API_KEY` 주입과 Gemini 호출이 성공했고, `github-actions[bot]`이 `[Townhall] 2026-10-05` Issue를 이슈 5건으로 게시했습니다.
+- 게시 내용: 과정별 섹션, 4항목 양식, 원본 링크가 모두 들어갔습니다. 회고가 없는 항목은 `(작성 필요: 회고 없음)`으로 표시됐습니다.
+- 중복 방지: 같은 제목으로 재실행하면 "이미 있어 종료함"으로 끝나고 Issue가 늘지 않았습니다.
+- 미확인: `schedule` 트리거의 자동 발화. 예약 실행은 수 분~1시간 지연될 수 있으므로 21:00까지 Issue가 없을 때 Actions에서 수동 재실행합니다.
