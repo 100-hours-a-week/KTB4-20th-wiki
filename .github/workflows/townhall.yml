@@ -1,0 +1,53 @@
+name: Townhall Issue
+
+# 매주 일요일 20:00(KST)에 지난 7일의 [Troubleshooting] 이슈를 모아 [Townhall] Issue를 게시함.
+# 문제 정의와 규칙은 tools/townhall/PROBLEM.md를 참고함.
+on:
+  schedule:
+    # cron은 UTC 기준이므로 일요일 20:00 KST는 일요일 11:00 UTC임. 예약 실행은 수 분~1시간가량 지연될 수 있음.
+    - cron: "0 11 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Issue를 만들지 않고 본문만 로그에 출력함"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: townhall
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tools/townhall
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: tools/townhall/.python-version
+          cache: pip
+          cache-dependency-path: tools/townhall/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Publish townhall issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            python -m townhall --repo "$GITHUB_REPOSITORY" --dry-run
+          else
+            python -m townhall --repo "$GITHUB_REPOSITORY"
+          fi

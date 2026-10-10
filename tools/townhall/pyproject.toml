@@ -1,0 +1,18 @@
+[project]
+name = "townhall"
+version = "0.1.0"
+description = "wiki 레포의 [Troubleshooting] 이슈를 모아 타운홀 미팅 Issue를 자동 생성함"
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=2.28.0",
+    "python-dotenv>=1.2.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

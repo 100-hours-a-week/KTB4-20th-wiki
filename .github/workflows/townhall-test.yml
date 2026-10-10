@@ -1,0 +1,33 @@
+name: Townhall Tests
+
+# tools/townhall 변경 PR에서 단위 테스트를 실행함. 예약 실행(townhall.yml)과 분리해 테스트 실패가 주간 게시를 막지 않게 함.
+on:
+  pull_request:
+    paths:
+      - "tools/townhall/**"
+      - ".github/workflows/townhall*.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: tools/townhall
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: tools/townhall/.python-version
+          cache: pip
+          cache-dependency-path: tools/townhall/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest
+
+      - name: Run unit tests
+        run: python -m pytest -q
